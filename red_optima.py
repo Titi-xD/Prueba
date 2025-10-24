@@ -82,7 +82,7 @@ class servicioUsuario(QMainWindow):
 
         self.usuario = usuario
         self.solicitudes = solicitudes()
-        id_usuario = self.usuario["id"]
+        self.id_usuario = self.usuario["id"]
 
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.setFixedSize(self.width(), self.height())
@@ -93,7 +93,7 @@ class servicioUsuario(QMainWindow):
         self.txt_nombre.setPlainText(self.usuario['nombre'])
         self.txt_contra.setPlainText(self.usuario['contrasena'])
         
-        solicitud_activa = self.solicitudes.cargar_solicitud_activa(id_usuario)
+        solicitud_activa = self.solicitudes.cargar_solicitud_activa(self.id_usuario)
         if solicitud_activa:
             self.mostrar_solicitud_activa(solicitud_activa)
         else:
@@ -243,14 +243,23 @@ class servicioUsuario(QMainWindow):
                 QMessageBox.warning(self, "Error", "El punto de origen y destino no pueden ser el mismo")
                 return
 
-            distancia, tiempo = self.solicitudes.calcular_ruta(punto_origen, punto_destino, transporte)
+            resultado = self.solicitudes.crear_solicitud(
+                self.id_usuario,
+                punto_origen,
+                punto_destino,
+                transporte,
+                "Activo",
+            )
 
-            precio = self.solicitudes.calcular_precio(distancia, tiempo, transporte)
+            if not resultado.get("success"):
+                QMessageBox.critical(self, "Error", resultado.get("message", "No se pudo crear la solicitud"))
+                return
 
+            data = resultado.get("data", {})
             self.lab_estado.setText("Activo")
-            self.lab_distancia.setText(f"{distancia} km")
-            self.lab_tiempo.setText(f"{tiempo} min")
-            self.lab_precio.setText(f"Q{precio}")
+            self.lab_distancia.setText(f"{data.get('distancia', 0)} km")
+            self.lab_tiempo.setText(f"{data.get('tiempo', 0)} min")
+            self.lab_precio.setText(f"Q{data.get('precio', 0)}")
 
             self.mostrar_botones()
 
