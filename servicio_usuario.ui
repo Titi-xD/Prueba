@@ -251,7 +251,7 @@ border: #FFFFFF;</string>
      <item>
       <widget class="QStackedWidget" name="stacked">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_inicio">
         <property name="styleSheet">
@@ -658,7 +658,7 @@ color: #3A3A3A;
 border-radius: 5px;</string>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Frente al Palacio Nacional&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;5ta Avenida 6-06, Zona 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
         <widget class="QWidget" name="widget_autobus" native="true">
@@ -713,7 +713,7 @@ color: #3A3A3A;
 border-radius: 5px;</string>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autobús&lt;/p&gt;&lt;p&gt;25 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autobús&lt;/p&gt;&lt;p&gt;15 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </widget>
@@ -770,7 +770,7 @@ color: #3A3A3A;
 border-radius: 5px;</string>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Automóvil&lt;/p&gt;&lt;p&gt;30 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Automóvil&lt;/p&gt;&lt;p&gt;20 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </widget>
@@ -826,7 +826,7 @@ color: #3A3A3A;
 border-radius: 5px;</string>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Motocicleta&lt;/p&gt;&lt;p&gt;40 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Motocicleta&lt;/p&gt;&lt;p&gt;25 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </widget>
@@ -882,7 +882,7 @@ color: #3A3A3A;
 border-radius: 5px;</string>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tren&lt;/p&gt;&lt;p&gt;35 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tren&lt;/p&gt;&lt;p&gt;30 km/h&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </widget>
@@ -950,7 +950,7 @@ border-radius: 5px;</string>
          </property>
          <item>
           <property name="text">
-           <string>Universidad San Carlos (Extensión Centro)</string>
+           <string>Municipalidad de Guatemala</string>
           </property>
          </item>
          <item>
@@ -1010,7 +1010,7 @@ border-radius: 5px;</string>
          </property>
          <item>
           <property name="text">
-           <string>Universidad San Carlos (Extensión Centro)</string>
+           <string>Municipalidad de Guatemala</string>
           </property>
          </item>
          <item>

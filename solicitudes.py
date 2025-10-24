@@ -1,5 +1,7 @@
 import json
 import os
+import re
+import math
 
 class solicitud:
     def __init__(self, id, id_usuario, punto_origen, punto_destino, transporte, estado, distancia, tiempo, precio):
@@ -33,6 +35,18 @@ class sistemaSolicitudes:
         self.solicitudes = []
         self.cargar_datos()
 
+    @staticmethod
+    def haversine_km(lat1, lon1, lat2, lon2):
+        R = 6371.0  # km
+        phi1 = math.radians(lat1)
+        phi2 = math.radians(lat2)
+        dphi = math.radians(lat2 - lat1)
+        dlambda = math.radians(lon2 - lon1)
+
+        a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c
+
     def cargar_datos(self):
         if os.path.exists(self.archivo):
             with open(self.archivo, "r", encoding="utf-8") as f:
@@ -59,20 +73,29 @@ class sistemaSolicitudes:
             return None
 
     def calcular_ruta(self, punto_origen, punto_destino, transporte):
-        import re
-
+        coordenadas = {
+            "Municipalidad de Guatemala": (14.627115, -90.514714),
+            "Hospital General San Juan de Dios": (14.639510, -90.521928),
+            "Café León": (14.639894, -90.511868),
+            "Restaurante San Martín": (14.639018, -90.514373),
+            "Instituto Nacional Central para Varones": (14.639584, -90.511003),
+            "Universidad San Carlos (Extensión Centro)": (14.635832, -90.508978),
+            "Teatro Nacional Miguel Ángel Asturias": (14.627499, -90.518080),
+            "Parque Central": (14.642549, -90.514758) }
+        
         velocidades = { 
-            "Motocicleta": 40.0,
-            "Automóvil": 30.0,
-            "Autobús": 25.0,
-            "Tren": 35.0}
-        v = velocidades.get((transporte or "").lower(), 30.0)
+            "Motocicleta": 25.0,
+            "Automóvil": 20.0,
+            "Autobús": 15.0,
+            "Tren": 30.0 }
+        
+        v = velocidades.get(transporte, 30.0)
 
         # 1) Intentar con coordenadas reales
-        c1 = self._parse_coordenadas(punto_origen)
-        c2 = self._parse_coordenadas(punto_destino)
+        c1 = coordenadas.get(punto_origen)
+        c2 = coordenadas.get(punto_destino)
         if c1 and c2:
-            distancia = self._haversine_km(c1[0], c1[1], c2[0], c2[1])
+            distancia = self.haversine_km(c1[0], c1[1], c2[0], c2[1])
             distancia = max(0.5, round(distancia, 2))  # mínimo razonable
         else:
             # 2) Fallback por zonas
@@ -88,12 +111,21 @@ class sistemaSolicitudes:
             distancia = round(distancia, 2)
 
         # Tiempo = distancia / velocidad * 60 (min)
-        tiempo = int(max(5, round((distancia / v) * 60)))
+        tiempo = round((distancia / v) * 60, 2)
         return distancia, tiempo
 
 
-    def calcular_precio(self, distancia, tiempo):
-        return round((distancia * 3.0) + (tiempo * 0.4), 2)
+    def calcular_precio(self, distancia, tiempo, transporte):
+        factores = {"Motocicleta": 2.5, "Automóvil": 2.0, "Autobús": 1.5, "Tren": 3.0}
+        f = factores.get(transporte, 2.0)
+        precio_base = (distancia * 3.0) + (tiempo * 0.4)
+        return round(precio_base * f, 2)
+
+    def validar_estado(self, estado):
+        return isinstance(estado, str) and estado.lower() in ["activa", "cancelada", "finalizada"]
+
+    def validar_transporte(self, transporte):
+        return isinstance(transporte, str) and transporte.lower() in ["motocicleta", "automovil", "autobus", "tren"]
 
 
     def crear_solicitud(self, id_usuario, punto_origen, punto_destino, transporte, estado):
@@ -110,7 +142,7 @@ class sistemaSolicitudes:
         
             # Cálculo automático
             distancia, tiempo = self.calcular_ruta(punto_origen, punto_destino, transporte)
-            precio = self.calcular_precio(distancia, tiempo)
+            precio = self.calcular_precio(distancia, tiempo, transporte)
         
             # Crear solicitud
             nuevo_id = len(self.solicitudes) + 1
@@ -123,7 +155,7 @@ class sistemaSolicitudes:
         
             return {
                 "success": True, 
-                "message": "✅ Solicitud creada correctamente",
+                "message": "Solicitud creada correctamente",
                 "data": {
                     "id": nuevo_id,
                     "distancia": distancia,
@@ -154,10 +186,10 @@ class sistemaSolicitudes:
     def actualizar_solicitud(self, id_solicitud, nuevo_estado):
         """Actualiza el estado de una solicitud"""
         try:
-            for solicitud in self.solicitudes:
-                if solicitud.id == id_solicitud:
+            for solicitud_item in self.solicitudes:
+                if solicitud_item.id == id_solicitud:
                     if self.validar_estado(nuevo_estado):
-                        solicitud.estado = nuevo_estado
+                        solicitud_item.estado = nuevo_estado
                         self.guardar_datos()
                         return {"success": True, "message": "Estado actualizado correctamente"}
                     else:
