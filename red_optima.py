@@ -43,7 +43,7 @@ class inicioSesion(QMainWindow):
             return
 
         if self.sesion.iniciar_sesion(nombre, contrasena):
-            datos_usuario = {"id": id, "nombre": nombre, "contrasena": contrasena}
+            datos_usuario = usuarios().leer_usuario(nombre)
             nueva_ventana = servicioUsuario(datos_usuario)
             nueva_ventana.show()
             self.hide()
@@ -86,9 +86,9 @@ class servicioUsuario(QMainWindow):
 
         self.lab_bienvenido.setText(f"¡Bienvenido {self.usuario['nombre']}!")
         self.lab_nombre.setText(self.usuario['nombre'])
-        self.lab_contra.setText(self.usuario['contraseña'])
-        self.txt_nombre.setText(self.usuario['nombre'])
-        self.txt_contra.setText(self.usuario['contraseña'])
+        self.lab_contra.setText(self.usuario['contrasena'])
+        self.txt_nombre.setPlainText(self.usuario['nombre'])
+        self.txt_contra.setPlainText(self.usuario['contrasena'])
         
         self.configurar_tabla()
         self.btn_actualizar.hide()

@@ -42,18 +42,19 @@ class usuarios:
         except Exception as e:
             return f"Error al crear el usuario: {e}"
 
-    def leer_usuarios(self, nombre):
+    def leer_usuario(self, nombre):
         try:
             usuarios = self.cargar_usuarios()
             for u in usuarios:
                 if u["nombre"].lower() == nombre.lower():
                     return {
                         "id": u["id"],
-                        "nombre": u["nombre"]
+                        "nombre": u["nombre"],
+                        "contraseña": u["contraseña"]
                     }
             return None
         except Exception as e:
-            return {"error": f"Ocurrió un error."}
+            return {"error": "Ocurrió un error."}
 
     def actualizar_usuario(self, user_id, nuevo_nombre=None, nueva_contrasena=None):
         try:
@@ -81,7 +82,3 @@ class usuarios:
                 return "Ocurrió un error."
         except Exception as e:
             return f"Error al eliminar usuario: {e}"  
-
-
-
-
