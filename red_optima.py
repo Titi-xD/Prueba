@@ -169,7 +169,7 @@ class servicioUsuario(QMainWindow):
         self.btn_crear.hide()
         self.btn_actualizar.show()
         self.btn_finalizar.show()
-        self.btn_cancelar.show
+        self.btn_cancelar.show()
         
 app = QApplication([])
 w = inicioSesion()
