@@ -245,7 +245,7 @@ class servicioUsuario(QMainWindow):
 
             distancia, tiempo = self.solicitudes.calcular_ruta(punto_origen, punto_destino, transporte)
 
-            precio = self.solicitudes.calcular_precio(distancia, tiempo)
+            precio = self.solicitudes.calcular_precio(distancia, tiempo, transporte)
 
             self.lab_estado.setText("Activo")
             self.lab_distancia.setText(f"{distancia} km")
