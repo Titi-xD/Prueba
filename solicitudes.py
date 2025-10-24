@@ -3,7 +3,7 @@ import os
 import re
 import math
 
-class solicitud:
+class Solicitud:
     def __init__(self, id, id_usuario, punto_origen, punto_destino, transporte, estado, distancia, tiempo, precio):
         self.id = id
         self.id_usuario = id_usuario
@@ -61,17 +61,26 @@ class sistemaSolicitudes:
         else:
             self.solicitudes = []
             
-    def cargar_solicitud_activa(self, id_usuario):
+    def mostrar_solicitud_activa(self, id_usuario):
         try:
-            solicitudes = self.cargar_solicitudes()
-            for s in solicitudes:
-                if s["id_usuario"] == id_usuario and s["estado"].lower() == "activo":
-                    return s 
+            self.cargar_datos()
+            for s in self.solicitudes:
+                if str(s.id_usuario) == str(id_usuario) and s.estado.lower() == "Activa":
+                    return s.to_dict()
             return None
         except Exception as e:
             print(f"Error al cargar solicitud activa: {e}")
             return None
 
+    def guardar_datos(self):
+        try:
+            with open(self.archivo, "w", encoding="utf-8") as f:
+                # Convertir cada solicitud a diccionario
+                json.dump([s.to_dict() for s in self.solicitudes], f, ensure_ascii=False, indent=4)
+            return "Datos guardados correctamente"
+        except Exception as e:
+            return f"Error al guardar: {e}"
+    
     def calcular_ruta(self, punto_origen, punto_destino, transporte):
         coordenadas = {
             "Municipalidad de Guatemala": (14.627115, -90.514714),
@@ -122,24 +131,14 @@ class sistemaSolicitudes:
         return round(precio_base * f, 2)
 
     def validar_estado(self, estado):
-        return isinstance(estado, str) and estado.lower() in ["activa", "cancelada", "finalizada"]
+        return isinstance(estado, str) and estado.lower() in ["Activa", "Cancelada", "Finalizada"]
 
     def validar_transporte(self, transporte):
         return isinstance(transporte, str) and transporte.lower() in ["motocicleta", "automovil", "autobus", "tren"]
 
 
     def crear_solicitud(self, id_usuario, punto_origen, punto_destino, transporte, estado):
-        try:
-            # Validaciones
-            if not all([str(id_usuario).strip(), punto_origen.strip(), punto_destino.strip(), transporte.strip(), estado.strip()]):
-                return {"success": False, "message": "Todos los campos son obligatorios"}
-        
-            if not self.validar_estado(estado):
-                return {"success": False, "message": "Estado inválido"}
-        
-            if not self.validar_transporte(transporte):
-                return {"success": False, "message": "Transporte inválido"}
-        
+        try:        
             # Cálculo automático
             distancia, tiempo = self.calcular_ruta(punto_origen, punto_destino, transporte)
             precio = self.calcular_precio(distancia, tiempo, transporte)

@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QLabel
 from usuarios import usuarios
 from sesion import sesion
 from solicitudes import sistemaSolicitudes as solicitudes
+from solicitudes import Solicitud, sistemaSolicitudes
 
 class inicioSesion(QMainWindow):
     def __init__(self):
@@ -93,7 +94,8 @@ class servicioUsuario(QMainWindow):
         self.txt_nombre.setPlainText(self.usuario['nombre'])
         self.txt_contra.setPlainText(self.usuario['contrasena'])
         
-        solicitud_activa = self.solicitudes.cargar_solicitud_activa(id_usuario)
+        solicitud_activa = self.solicitudes.mostrar_solicitud_activa(id_usuario)
+        print("Solicitud activa:", solicitud_activa)
         if solicitud_activa:
             self.mostrar_solicitud_activa(solicitud_activa)
         else:
@@ -235,24 +237,26 @@ class servicioUsuario(QMainWindow):
             
     def crear_solicitud(self):
         try:
+            id_usuario = self.usuario["id"]
             punto_origen = self.combox_pto_inicial.currentText().strip()
             punto_destino = self.combox_pto_destino.currentText().strip()
             transporte = self.combox_transporte.currentText().strip()
-        
+    
             if punto_origen == punto_destino:
                 QMessageBox.warning(self, "Error", "El punto de origen y destino no pueden ser el mismo")
                 return
 
-            distancia, tiempo = self.solicitudes.calcular_ruta(punto_origen, punto_destino, transporte)
+            resultado = self.solicitudes.crear_solicitud(id_usuario, punto_origen, punto_destino, transporte, "Activa")
 
-            precio = self.solicitudes.calcular_precio(distancia, tiempo)
-
-            self.lab_estado.setText("Activo")
-            self.lab_distancia.setText(f"{distancia} km")
-            self.lab_tiempo.setText(f"{tiempo} min")
-            self.lab_precio.setText(f"Q{precio}")
-
-            self.mostrar_botones()
+            if resultado["success"]:
+                data = resultado["data"]
+                self.lab_estado.setText("Activa")
+                self.lab_distancia.setText(f"{data['distancia']} km")
+                self.lab_tiempo.setText(f"{data['tiempo']} min")
+                self.lab_precio.setText(f"Q{data['precio']}")
+                self.mostrar_botones()
+            else:
+                QMessageBox.warning(self, "Error", resultado["message"])
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Ocurrió un error al crear la solicitud: {e}")
