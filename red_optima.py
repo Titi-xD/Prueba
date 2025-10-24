@@ -86,9 +86,9 @@ class servicioUsuario(QMainWindow):
 
         self.lab_bienvenido.setText(f"¡Bienvenido {self.usuario['nombre']}!")
         self.lab_nombre.setText(self.usuario['nombre'])
-        self.lab_contra.setText(self.usuario['contraseña'])
-        self.txt_nombre.setText(self.usuario['nombre'])
-        self.txt_contra.setText(self.usuario['contraseña'])
+        self.lab_contra.setText(self.usuario['contrasena'])
+        self.txt_nombre.setPlainText(self.usuario['nombre'])
+        self.txt_contra.setPlainText(self.usuario['contrasena'])
         
         self.configurar_tabla()
         self.btn_actualizar.hide()
@@ -169,7 +169,7 @@ class servicioUsuario(QMainWindow):
         self.btn_crear.hide()
         self.btn_actualizar.show()
         self.btn_finalizar.show()
-        self.btn_cancelar.show
+        self.btn_cancelar.show()
         
 app = QApplication([])
 w = inicioSesion()
