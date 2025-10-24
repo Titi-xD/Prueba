@@ -1,7 +1,7 @@
 import json
 import os
 
-class solicitud:
+class Solicitud:
     def __init__(self, id, id_usuario, punto_origen, punto_destino, transporte, estado, distancia, tiempo, precio):
         self.id = id
         self.id_usuario = id_usuario
@@ -34,18 +34,37 @@ class sistemaSolicitudes:
         self.cargar_datos()
 
     def cargar_datos(self):
-        if os.path.exists(self.archivo):
-            with open(self.archivo, "r", encoding="utf-8") as f:
-                try:
-                    data = json.load(f)
-                    for item in data:
-                        if 'id_transporte' in item:
-                            item['transporte'] = item.pop('id_transporte')
-                    self.solicitudes = [Solicitud(**item) for item in data]
-                except (json.JSONDecodeError, KeyError):
-                    self.solicitudes = []
-        else:
+        data = self.cargar_solicitudes()
+        try:
+            self.solicitudes = [Solicitud(**item) for item in data]
+        except Exception:
             self.solicitudes = []
+
+    def cargar_solicitudes(self):
+        if not os.path.exists(self.archivo):
+            return []
+        try:
+            with open(self.archivo, "r", encoding="utf-8") as f:
+                if f.read().strip() == "":
+                    return []
+                f.seek(0)
+                data = json.load(f)
+                # Migración de claves antiguas si existieran
+                for item in data:
+                    if "id_transporte" in item and "transporte" not in item:
+                        item["transporte"] = item.pop("id_transporte")
+                return data if isinstance(data, list) else []
+        except (json.JSONDecodeError, OSError):
+            return []
+
+    def guardar_datos(self):
+        try:
+            serializado = [s.to_dict() for s in self.solicitudes]
+            with open(self.archivo, "w", encoding="utf-8") as f:
+                json.dump(serializado, f, indent=2, ensure_ascii=False)
+            return True
+        except Exception:
+            return False
             
     def cargar_solicitud_activa(self, id_usuario):
         try:
@@ -61,11 +80,14 @@ class sistemaSolicitudes:
     def calcular_ruta(self, punto_origen, punto_destino, transporte):
         import re
 
-        velocidades = { 
-            "Motocicleta": 40.0,
-            "Automóvil": 30.0,
-            "Autobús": 25.0,
-            "Tren": 35.0}
+        # velocidades por tipo de transporte (minúsculas)
+        velocidades = {
+            "motocicleta": 40.0,
+            "automóvil": 30.0,
+            "autobus": 25.0,   # sin tilde por robustez
+            "autobús": 25.0,
+            "tren": 35.0,
+        }
         v = velocidades.get((transporte or "").lower(), 30.0)
 
         # 1) Intentar con coordenadas reales
@@ -154,10 +176,10 @@ class sistemaSolicitudes:
     def actualizar_solicitud(self, id_solicitud, nuevo_estado):
         """Actualiza el estado de una solicitud"""
         try:
-            for solicitud in self.solicitudes:
-                if solicitud.id == id_solicitud:
+            for solicitud_item in self.solicitudes:
+                if solicitud_item.id == id_solicitud:
                     if self.validar_estado(nuevo_estado):
-                        solicitud.estado = nuevo_estado
+                        solicitud_item.estado = nuevo_estado
                         self.guardar_datos()
                         return {"success": True, "message": "Estado actualizado correctamente"}
                     else:
@@ -166,4 +188,40 @@ class sistemaSolicitudes:
             return {"success": False, "message": "Solicitud no encontrada"}
         except Exception as e:
             return {"success": False, "message": f"Error: {str(e)}"}
+
+    # ---------- Utilidades y validaciones ----------
+    def validar_estado(self, estado):
+        estados_validos = {"activo", "pendiente", "finalizado", "cancelado"}
+        return (estado or "").strip().lower() in estados_validos
+
+    def validar_transporte(self, transporte):
+        t = (transporte or "").strip().lower()
+        validos = {"autobús", "autobus", "automóvil", "automovil", "motocicleta", "tren"}
+        return t in validos
+
+    def _parse_coordenadas(self, texto):
+        """Devuelve (lat, lon) en float si encuentra dos números en el texto, si no None."""
+        import re
+        if not texto:
+            return None
+        numeros = re.findall(r"[-+]?\d+(?:\.\d+)?", texto)
+        if len(numeros) < 2:
+            return None
+        try:
+            lat = float(numeros[0])
+            lon = float(numeros[1])
+            if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                return None
+            return (lat, lon)
+        except ValueError:
+            return None
+
+    def _haversine_km(self, lat1, lon1, lat2, lon2):
+        from math import radians, sin, cos, asin, sqrt
+        R = 6371.0
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
+        a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+        c = 2 * asin(sqrt(a))
+        return R * c
 
