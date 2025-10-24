@@ -3,7 +3,7 @@ import os
 import re
 import math
 
-class solicitud:
+class Solicitud:
     def __init__(self, id, id_usuario, punto_origen, punto_destino, transporte, estado, distancia, tiempo, precio):
         self.id = id
         self.id_usuario = id_usuario
@@ -60,13 +60,37 @@ class sistemaSolicitudes:
                     self.solicitudes = []
         else:
             self.solicitudes = []
+
+    def guardar_datos(self):
+        try:
+            with open(self.archivo, "w", encoding="utf-8") as f:
+                json.dump(
+                    [s.to_dict() if isinstance(s, Solicitud) else s for s in self.solicitudes],
+                    f,
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            return True
+        except Exception as e:
+            print(f"Error al guardar datos: {e}")
+            return False
+
+    def cargar_solicitudes(self):
+        return [s.to_dict() if isinstance(s, Solicitud) else s for s in self.solicitudes]
             
     def cargar_solicitud_activa(self, id_usuario):
         try:
-            solicitudes = self.cargar_solicitudes()
-            for s in solicitudes:
-                if s["id_usuario"] == id_usuario and s["estado"].lower() == "activo":
-                    return s 
+            for s in self.solicitudes:
+                if isinstance(s, Solicitud):
+                    estado = str(s.estado).lower()
+                    coincide_usuario = s.id_usuario == id_usuario
+                    if coincide_usuario and estado in ("activo", "activa"):
+                        return s.to_dict()
+                else:
+                    estado = str(s.get("estado", "")).lower()
+                    coincide_usuario = s.get("id_usuario") == id_usuario
+                    if coincide_usuario and estado in ("activo", "activa"):
+                        return s
             return None
         except Exception as e:
             print(f"Error al cargar solicitud activa: {e}")
@@ -122,10 +146,18 @@ class sistemaSolicitudes:
         return round(precio_base * f, 2)
 
     def validar_estado(self, estado):
-        return isinstance(estado, str) and estado.lower() in ["activa", "cancelada", "finalizada"]
+        if not isinstance(estado, str):
+            return False
+        estado_norm = estado.strip().lower()
+        return estado_norm in ["activa", "activo", "cancelada", "finalizada"]
 
     def validar_transporte(self, transporte):
-        return isinstance(transporte, str) and transporte.lower() in ["motocicleta", "automovil", "autobus", "tren"]
+        if not isinstance(transporte, str):
+            return False
+        t = transporte.strip().lower()
+        # Aceptar con y sin tilde
+        valores_validos = {"motocicleta", "automóvil", "automovil", "autobús", "autobus", "tren"}
+        return t in valores_validos
 
 
     def crear_solicitud(self, id_usuario, punto_origen, punto_destino, transporte, estado):
