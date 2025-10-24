@@ -48,28 +48,18 @@ class sistemaSolicitudes:
             self.solicitudes = []
             
     def cargar_solicitud_activa(self, id_usuario):
-        for solicitud in self.solicitudes:
-            if solicitud.id_usuario == id_usuario and solicitud.estado.lower() == "activo":
-                # Cargar datos en los widgets
-                self.combox_pto_inicial.setCurrentText(solicitud.punto_origen)
-                self.combox_pto_destino.setCurrentText(solicitud.punto_destino)
-                self.combox_transporte.setCurrentText(solicitud.transporte)
-                self.lab_estado.setText(solicitud.estado)
-                self.lab_distancia.setText(f"{solicitud.distancia} km")
-                self.lab_tiempo.setText(f"{solicitud.tiempo} min")
-                self.lab_precio.setText(f"Q{solicitud.precio}")
-
-                # Cambiar visibilidad de botones
-                self.btn_crear.hide()
-                self.btn_actualizar.show()
-                self.btn_finalizar.show()
-                self.btn_cancelar.show()
-                return True
-
-        return False
+        try:
+            solicitudes = self.cargar_solicitudes()
+            for s in solicitudes:
+                if s["id_usuario"] == id_usuario and s["estado"].lower() == "activo":
+                    return s 
+            return None
+        except Exception as e:
+            print(f"Error al cargar solicitud activa: {e}")
+            return None
 
     def calcular_ruta(self, punto_origen, punto_destino, transporte):
-        import re  # por si no estaba importado
+        import re
 
         velocidades = { 
             "Motocicleta": 40.0,

@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel
 from usuarios import usuarios
 from sesion import sesion
+from solicitudes import solicitudes
 
 class inicioSesion(QMainWindow):
     def __init__(self):
@@ -80,6 +81,7 @@ class servicioUsuario(QMainWindow):
         loadUi("servicio_usuario.ui", self)
 
         self.usuario = usuario
+        self.solicitudes = solicitudes()
         id_usuario = self.usuario["id"]
 
         self.setWindowFlag(Qt.FramelessWindowHint)
@@ -91,9 +93,9 @@ class servicioUsuario(QMainWindow):
         self.txt_nombre.setPlainText(self.usuario['nombre'])
         self.txt_contra.setPlainText(self.usuario['contrasena'])
         
-        if self.cargar_solicitud_activa(id_usuario):
-            QMessageBox.information(self, "Solicitud activa", "Ya tienes una solicitud activa.")
-            self.mostrar_botones()
+        solicitud_activa = self.solicitudes.cargar_solicitud_activa(id_usuario)
+        if solicitud_activa:
+            self.mostrar_solicitud_activa(solicitud_activa)
         else:
             self.ocultar_botones()
     
@@ -238,9 +240,8 @@ class servicioUsuario(QMainWindow):
             transporte = self.combox_transporte.currentText().strip()
         
             if punto_origen == punto_destino:
-                QMessageBox.warning(self, "Error", "El punto de origen y destino no puede ser el mismo.")
+                QMessageBox.warning(self, "Error", "El punto de origen y destino no pueden ser el mismo")
                 return
-
 
             distancia, tiempo = self.calcular_ruta(punto_origen, punto_destino, transporte)
 
@@ -255,6 +256,20 @@ class servicioUsuario(QMainWindow):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Ocurrió un error al crear la solicitud: {e}")
+    
+    def mostrar_solicitud_activa(self, solicitud):
+        self.combox_pto_inicial.setCurrentText(solicitud["punto_origen"])
+        self.combox_pto_destino.setCurrentText(solicitud["punto_destino"])
+        self.combox_transporte.setCurrentText(solicitud["transporte"])
+        self.lab_estado.setText(solicitud["estado"])
+        self.lab_distancia.setText(f"{solicitud['distancia']} km")
+        self.lab_tiempo.setText(f"{solicitud['tiempo']} min")
+        self.lab_precio.setText(f"Q{solicitud['precio']}")
+
+        self.btn_crear.hide()
+        self.btn_actualizar.show()
+        self.btn_finalizar.show()
+        self.btn_cancelar.show()
         
 app = QApplication([])
 w = inicioSesion()
