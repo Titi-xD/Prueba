@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel
 from usuarios import usuarios
 from sesion import sesion
-from solicitudes import solicitudes
+from solicitudes import sistemaSolicitudes as solicitudes
 
 class inicioSesion(QMainWindow):
     def __init__(self):
@@ -243,9 +243,9 @@ class servicioUsuario(QMainWindow):
                 QMessageBox.warning(self, "Error", "El punto de origen y destino no pueden ser el mismo")
                 return
 
-            distancia, tiempo = self.calcular_ruta(punto_origen, punto_destino, transporte)
+            distancia, tiempo = self.solicitudes.calcular_ruta(punto_origen, punto_destino, transporte)
 
-            precio = self.calcular_precio(distancia, tiempo)
+            precio = self.solicitudes.calcular_precio(distancia, tiempo)
 
             self.lab_estado.setText("Activo")
             self.lab_distancia.setText(f"{distancia} km")
