@@ -50,7 +50,7 @@ class usuarios:
                     return {
                         "id": u["id"],
                         "nombre": u["nombre"],
-                        "contraseña": u["contraseña"]
+                        "contrasena": u["contrasena"]
                     }
             return None
         except Exception as e:
@@ -64,7 +64,7 @@ class usuarios:
                     if nuevo_nombre:
                         u["nombre"] = nuevo_nombre
                     if nueva_contrasena:
-                        u["contraseña"] = nueva_contrasena
+                        u["contrasena"] = nueva_contrasena
                     resultado = self.guardar_usuarios(usuarios)
                     return "Usuario actualizado correctamente." if "Error" not in resultado else resultado
             return "Ocurrió un error."
